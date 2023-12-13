@@ -21,14 +21,16 @@ struct CharacterModel
     var currentHitPoint: Int //now Hp
     var maxHitPoint: Int //max Hp
     var livingEnvironment: Int //now living environment
+    var maxLivingEnvironment: Int //max living environment
     var favorabilityRating: Int //now favorability
+    var maxFavorabilityRating: Int //max favorability
     var lastFeedDate: Date? //last feed date
     var last12HourFeedCount: Int //last feed times
     var growthFactor:Int //exp
     {
         favorabilityRating / 10
     }
-    var dateOfDeath:Date //day to die
+    var dateOfDeath:Date=Calendar.current.date(byAdding: .day, value: -1, to: Date())!//day to die
     var isDead:Bool//already dead
     {
         let timeInterval = Date().timeIntervalSince(dateOfDeath)

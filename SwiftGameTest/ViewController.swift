@@ -29,6 +29,9 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         topViewSetup()
         bottomViewSetup()
+        eatButton.addTarget(self, action: #selector(eatButtonPressed), for: .touchUpInside)
+        cleaningButton.addTarget(self, action: #selector(cleaningButtonPressed), for: .touchUpInside)
+        playButton.addTarget(self, action: #selector(playButtonPressed), for: .touchUpInside)
     }
     
     override func viewWillAppear(_ animated: Bool)
@@ -54,6 +57,17 @@ class ViewController: UIViewController {
         bottomBaseView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
     }
 
+    var characterInstance = CharacterModel(
+        currentGrowthState: .childhood,
+        currentHitPoint: 10,
+        maxHitPoint: 100,
+        livingEnvironment: 1,
+        maxLivingEnvironment: 10,
+        favorabilityRating: 0,
+        maxFavorabilityRating: 100,
+        lastFeedDate: nil,
+        last12HourFeedCount: 0
+    )
     
     //Update Character Image Pos
     func updateCharacterPosition()
@@ -64,12 +78,12 @@ class ViewController: UIViewController {
             
             characterImageViews.forEach{view in view.image = nil}
             
-        if let imageView = characterImageViews.randomElement()
-        {
-            imageView.image = UIImage(named: "CharacterDemoImage")
-        }
-        try? await Task.sleep(nanoseconds: 5 * 1000000000)
-        updateCharacterPosition()
+            if let imageView = characterImageViews.randomElement()
+            {
+                imageView.image = UIImage(named: "CharacterDemoImage")
+            }
+            try? await Task.sleep(nanoseconds: 5 * 1000000000)
+            //updateCharacterPosition()
         }
     }
     
@@ -78,7 +92,9 @@ class ViewController: UIViewController {
         dateUpdateTask = Task
         {
             @MainActor in
-            
+            lifePointValueLabel.text = String(characterInstance.currentHitPoint) + "/" + String(characterInstance.maxHitPoint)
+            comfyPointValueLabel.text = String(characterInstance.livingEnvironment) + "/" + String(characterInstance.maxLivingEnvironment)
+            favPointValueLabel.text = String(characterInstance.favorabilityRating) + "/" + String(characterInstance.maxFavorabilityRating)
             let now = Date()
             let dateFormatter = DateFormatter()
             dateFormatter.locale = .init(identifier: "ja_JP")
@@ -88,6 +104,43 @@ class ViewController: UIViewController {
             dayOfWeekLabel.text = "(\(dateFormatter.string(from: now)))"
             try? await Task.sleep(nanoseconds: 60 * 60 * 1000000000)
             updateDateLabel()
+        }
+    }
+    
+    @objc func eatButtonPressed() {
+        print("Eat Button Pressed!")
+        if(self.characterInstance.currentHitPoint<self.characterInstance.maxHitPoint)
+        {
+            self.characterInstance.currentHitPoint += 1
+            lifePointValueLabel.text = String(characterInstance.currentHitPoint) + "/" + String(characterInstance.maxHitPoint)
+            print("LifePoint++")
+            updateCharacterPosition()
+        }
+    }
+    
+    @objc func playButtonPressed() {
+        print("Play Button Pressed!")
+        if(self.characterInstance.favorabilityRating<self.characterInstance.maxFavorabilityRating)
+        {
+            self.characterInstance.favorabilityRating += 1
+            favPointValueLabel.text = String(characterInstance.favorabilityRating) + "/" + String(characterInstance.maxFavorabilityRating)
+            print("FavPoint++")
+            updateCharacterPosition()
+        }
+    }
+    
+    @objc func cleaningButtonPressed() {
+        print("Cleaning Button Pressed!")
+        if(self.characterInstance.livingEnvironment<self.characterInstance.maxLivingEnvironment)
+        {
+            self.characterInstance.livingEnvironment += 1
+            comfyPointValueLabel.text = String(characterInstance.livingEnvironment) + "/" + String(characterInstance.maxLivingEnvironment)
+            print("Environment++")
+            updateCharacterPosition()
+        }
+        else
+        {
+            print("On Max Living Environment")
         }
     }
 }
